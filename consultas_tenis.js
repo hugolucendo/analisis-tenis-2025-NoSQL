@@ -168,3 +168,47 @@ var fase6 = { $sort: { "porcentaje": -1 } }
 var fase7 = { $limit: 10 }
 var etapas = [ fase1, fase2, fase3, fase4, fase5, fase6, fase7 ]
 db.partidos.aggregate(etapas)
+
+// Duracion media por superficie separando partidos al mejor de 3 y de 5 sets
+var fase1 = { $match: { "minutos": { $ne: null } } }
+var fase2 = { $group: { "_id": { "superficie": "$superficie", "al_mejor_de": "$al_mejor_de" }, "partidos": { $sum: 1 }, "media_minutos": { $avg: "$minutos" } } }
+var fase3 = { $sort: { "_id.al_mejor_de": 1, "media_minutos": -1 } }
+var etapas = [ fase1, fase2, fase3 ]
+db.partidos.aggregate(etapas)
+
+// Partidos sin duracion por torneo
+var fase1 = { $match: { "minutos": null } }
+var fase2 = { $group: { "_id": "$torneo", "partidos": { $sum: 1 } } }
+var fase3 = { $sort: { "partidos": -1 } }
+var fase4 = { $limit: 5 }
+var etapas = [ fase1, fase2, fase3, fase4 ]
+db.partidos.aggregate(etapas)
+
+// Puntos que suman los titulos de cada jugador (uniendo con la coleccion niveles)
+var fase1 = { $match: { "ronda": "F" } }
+var fase2 = { $lookup: { from: "niveles", localField: "nivel", foreignField: "codigo", as: "info_nivel" } }
+var fase3 = { $unwind: "$info_nivel" }
+var fase4 = { $group: { "_id": "$ganador.nombre", "titulos": { $sum: 1 }, "puntos": { $sum: "$info_nivel.puntos_campeon" }, "tipos": { $push: "$info_nivel.nombre" } } }
+var fase5 = { $sort: { "puntos": -1 } }
+var fase6 = { $limit: 5 }
+var etapas = [ fase1, fase2, fase3, fase4, fase5, fase6 ]
+db.partidos.aggregate(etapas)
+
+// Porcentaje de sets que acaban en tiebreak por superficie
+var fase1 = { $unwind: "$sets" }
+var fase2 = { $match: { "sets.juegos_ganador": { $ne: null } } }
+var es_tiebreak = { $cond: [ { $ne: [ "$sets.tiebreak", null ] }, 1, 0 ] }
+var fase3 = { $group: { "_id": "$superficie", "sets": { $sum: 1 }, "tiebreaks": { $sum: es_tiebreak } } }
+var fase4 = { $addFields: { "porcentaje": { $multiply: [ { $divide: [ "$tiebreaks", "$sets" ] }, 100 ] } } }
+var fase5 = { $sort: { "porcentaje": -1 } }
+var etapas = [ fase1, fase2, fase3, fase4, fase5 ]
+db.partidos.aggregate(etapas)
+
+// Aces por partido y por juego de saque en cada superficie
+var fase1 = { $match: { "con_estadisticas": true } }
+var fase2 = { $addFields: { "aces_partido": { $add: [ "$ganador.estadisticas.aces", "$perdedor.estadisticas.aces" ] }, "juegos_saque_partido": { $add: [ "$ganador.estadisticas.juegos_saque", "$perdedor.estadisticas.juegos_saque" ] } } }
+var fase3 = { $group: { "_id": "$superficie", "partidos": { $sum: 1 }, "media_aces": { $avg: "$aces_partido" }, "total_aces": { $sum: "$aces_partido" }, "total_juegos_saque": { $sum: "$juegos_saque_partido" } } }
+var fase4 = { $addFields: { "aces_por_juego_saque": { $divide: [ "$total_aces", "$total_juegos_saque" ] } } }
+var fase5 = { $sort: { "aces_por_juego_saque": -1 } }
+var etapas = [ fase1, fase2, fase3, fase4, fase5 ]
+db.partidos.aggregate(etapas)
