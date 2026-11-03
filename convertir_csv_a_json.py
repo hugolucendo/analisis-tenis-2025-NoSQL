@@ -6,6 +6,8 @@ FICHERO_JSON = "datos/atp_partidos_2025.json"
 
 
 def a_numero(valor):
+    """Convierte un texto del csv a int o float.
+    Si el valor esta vacio devuelve None."""
     if valor == "":
         return None
     numero = float(valor)
@@ -15,10 +17,13 @@ def a_numero(valor):
 
 
 def formatear_fecha(fecha):
+    """Pasa la fecha del formato 20250113 al formato 2025-01-13."""
     return fecha[0:4] + "-" + fecha[4:6] + "-" + fecha[6:8]
 
 
 def crear_jugador(fila, prefijo, prefijo_est):
+    """Devuelve un diccionario con los datos y estadisticas de un jugador.
+    prefijo es winner o loser y prefijo_est es w o l."""
     jugador = {
         "id": fila[prefijo + "_id"],
         "nombre": fila[prefijo + "_name"],
