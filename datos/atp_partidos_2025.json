@@ -209735,5 +209735,80 @@
                 "breaks_en_contra": 6
             }
         }
+    },
+    {
+        "id_torneo": "2025-7696",
+        "torneo": "Next Gen ATP Finals",
+        "superficie": "Hard",
+        "nivel": "A",
+        "pista_cubierta": true,
+        "fecha": "2025-12-22",
+        "ronda": "F",
+        "al_mejor_de": 5,
+        "resultado": "4-3(4) 4-2 4-1",
+        "sets": [
+            {
+                "juegos_ganador": 4,
+                "juegos_perdedor": 3,
+                "tiebreak": {
+                    "puntos_ganador": 7,
+                    "puntos_perdedor": 4
+                }
+            },
+            {
+                "juegos_ganador": 4,
+                "juegos_perdedor": 2,
+                "tiebreak": null
+            },
+            {
+                "juegos_ganador": 4,
+                "juegos_perdedor": 1,
+                "tiebreak": null
+            }
+        ],
+        "final": "completo",
+        "minutos": 59,
+        "ganador": {
+            "id": "T0HA",
+            "nombre": "Learner Tien",
+            "pais": "USA",
+            "mano": "L",
+            "altura": 180,
+            "edad": 20.055,
+            "ranking": 28,
+            "puntos_ranking": 1550,
+            "estadisticas": {
+                "aces": null,
+                "dobles_faltas": null,
+                "puntos_saque": null,
+                "primeros_dentro": null,
+                "primeros_ganados": null,
+                "segundos_ganados": null,
+                "juegos_saque": null,
+                "breaks_salvados": null,
+                "breaks_en_contra": null
+            }
+        },
+        "perdedor": {
+            "id": "B0PG",
+            "nombre": "Alexander Blockx",
+            "pais": "BEL",
+            "mano": "R",
+            "altura": 193,
+            "edad": 20.706,
+            "ranking": 116,
+            "puntos_ranking": 542,
+            "estadisticas": {
+                "aces": null,
+                "dobles_faltas": null,
+                "puntos_saque": null,
+                "primeros_dentro": null,
+                "primeros_ganados": null,
+                "segundos_ganados": null,
+                "juegos_saque": null,
+                "breaks_salvados": null,
+                "breaks_en_contra": null
+            }
+        }
     }
 ]

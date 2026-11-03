@@ -109,10 +109,13 @@ partidos = []
 with open(FICHERO_CSV, encoding="utf-8") as f:
     lector = csv.DictReader(f)
     for fila in lector:
-        # la ultima fila del csv viene cortada
+        # la ultima fila del csv viene cortada a mitad de las estadisticas,
+        # el resto de datos estan bien asi que dejo las estadisticas vacias
         if fila["l_bpFaced"] is None:
-            print("Fila incompleta:", fila["tourney_name"], fila["winner_name"])
-            continue
+            print("Fila sin estadisticas completas:", fila["tourney_name"], fila["round"], fila["winner_name"])
+            for columna in fila:
+                if columna.startswith("w_") or columna.startswith("l_"):
+                    fila[columna] = ""
         partido = {
             "id_torneo": fila["tourney_id"],
             "torneo": fila["tourney_name"],
