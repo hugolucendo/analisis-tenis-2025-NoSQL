@@ -74,6 +74,7 @@ db.partidos.updateOne(query, operacion)
 db.partidos.find(query)
 
 // Borrarlo porque el analisis es solo de 2025
+var query = { "fecha": "2026-01-02" }
 db.partidos.deleteOne(query)
 db.partidos.countDocuments({})
 
@@ -131,3 +132,39 @@ db.partidos.countDocuments(query)
 var query = { "sets": { $elemMatch: { "juegos_ganador": 0, "juegos_perdedor": 6 } } }
 var proyeccion = { "_id": 0, "torneo": 1, "ronda": 1, "ganador.nombre": 1, "perdedor.nombre": 1, "resultado": 1 }
 db.partidos.find(query, proyeccion)
+
+
+// ---------------- 3. PIPELINE DE AGREGACION ----------------
+
+// Partidos y duracion media por superficie
+var fase1 = { $group: { "_id": "$superficie", "partidos": { $sum: 1 }, "media_minutos": { $avg: "$minutos" } } }
+var fase2 = { $sort: { "partidos": -1 } }
+var etapas = [ fase1, fase2 ]
+db.partidos.aggregate(etapas)
+
+// Los 10 jugadores con mas victorias
+var fase1 = { $group: { "_id": "$ganador.nombre", "victorias": { $sum: 1 } } }
+var fase2 = { $sort: { "victorias": -1 } }
+var fase3 = { $limit: 10 }
+var etapas = [ fase1, fase2, fase3 ]
+db.partidos.aggregate(etapas)
+
+// Jugadores con mas titulos y que torneos ganaron
+var fase1 = { $match: { "ronda": "F" } }
+var fase2 = { $group: { "_id": "$ganador.nombre", "titulos": { $sum: 1 }, "torneos": { $push: "$torneo" } } }
+var fase3 = { $sort: { "titulos": -1 } }
+var fase4 = { $limit: 5 }
+var etapas = [ fase1, fase2, fase3, fase4 ]
+db.partidos.aggregate(etapas)
+
+// Porcentaje de victorias de los jugadores con al menos 40 partidos
+var jugadores = [ { "nombre": "$ganador.nombre", "victoria": 1 }, { "nombre": "$perdedor.nombre", "victoria": 0 } ]
+var fase1 = { $project: { "_id": 0, "jugadores": jugadores } }
+var fase2 = { $unwind: "$jugadores" }
+var fase3 = { $group: { "_id": "$jugadores.nombre", "partidos": { $sum: 1 }, "victorias": { $sum: "$jugadores.victoria" } } }
+var fase4 = { $match: { "partidos": { $gte: 40 } } }
+var fase5 = { $addFields: { "porcentaje": { $multiply: [ { $divide: [ "$victorias", "$partidos" ] }, 100 ] } } }
+var fase6 = { $sort: { "porcentaje": -1 } }
+var fase7 = { $limit: 10 }
+var etapas = [ fase1, fase2, fase3, fase4, fase5, fase6, fase7 ]
+db.partidos.aggregate(etapas)
