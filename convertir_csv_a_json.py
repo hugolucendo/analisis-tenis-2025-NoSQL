@@ -1,7 +1,3 @@
-# Convierte el csv de partidos ATP 2025 a un json para importarlo en MongoDB.
-# En el csv cada partido es una fila con 49 columnas, aqui agrupo los datos
-# del ganador y del perdedor en documentos embebidos.
-
 import csv
 import json
 
@@ -9,7 +5,6 @@ FICHERO_CSV = "datos/atp_partidos_2025.csv"
 FICHERO_JSON = "datos/atp_partidos_2025.json"
 
 
-# Pasa un texto a numero. Si esta vacio devuelve None (null en mongo)
 def a_numero(valor):
     if valor == "":
         return None
@@ -19,13 +14,10 @@ def a_numero(valor):
     return numero
 
 
-# Pasa la fecha de 20250113 a 2025-01-13
 def formatear_fecha(fecha):
     return fecha[0:4] + "-" + fecha[4:6] + "-" + fecha[6:8]
 
 
-# Crea el documento de un jugador. prefijo es "winner" o "loser" para los
-# datos personales y prefijo_est es "w" o "l" para las estadisticas
 def crear_jugador(fila, prefijo, prefijo_est):
     jugador = {
         "id": fila[prefijo + "_id"],
@@ -56,9 +48,9 @@ partidos = []
 with open(FICHERO_CSV, encoding="utf-8") as f:
     lector = csv.DictReader(f)
     for fila in lector:
-        # La ultima fila del csv viene cortada (le faltan columnas), la salto
+        # la ultima fila del csv viene cortada
         if fila["l_bpFaced"] is None:
-            print("Fila incompleta, no se incluye:", fila["tourney_name"], fila["winner_name"])
+            print("Fila incompleta:", fila["tourney_name"], fila["winner_name"])
             continue
         partido = {
             "id_torneo": fila["tourney_id"],
