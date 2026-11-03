@@ -134,7 +134,7 @@
       \centering
       \vspace{6pt}
       \rule{\linewidth}{0.8pt}\\[3pt]
-      \includegraphics[width=\linewidth,height=0.38\textheight,keepaspectratio]{#1}\\[-1pt]
+      \includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio]{#1}\\[-1pt]
       \rule{\linewidth}{0.8pt}
       \caption{#2}
     \end{table}}{%
@@ -149,7 +149,7 @@
 \newcommand{\resultadoextra}[1]{%
   \IfFileExists{img/#1.png}{%
     \begin{center}\vspace{-4pt}
-      \includegraphics[width=\linewidth,height=0.38\textheight,keepaspectratio]{#1}\\[-1pt]
+      \includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio]{#1}\\[-1pt]
       \rule{\linewidth}{0.8pt}
     \end{center}}{}}
 
@@ -157,7 +157,7 @@
 \newcommand{\grafica}[2]{%
   \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\linewidth]{#1}
+    \includegraphics[width=0.65\linewidth]{#1}
     \caption{#2}
   \end{figure}}
 
@@ -212,7 +212,7 @@ Cada consulta se presenta en el orden consulta, resultado e interpretación. Tod
 % ---------------------------------------------------------------------
 %  2. DATASET
 % ---------------------------------------------------------------------
-\newpage
+\bigskip
 \seccion{2}{Dataset}
 \subseccion{2.1}{Origen de los datos}
 
@@ -222,7 +222,7 @@ Los datos proceden de TML-Database (\url{https://github.com/Tennismylife/TML-Dat
 
 El fichero original es un CSV en el que cada partido ocupa una fila con 49 columnas: unas describen el torneo y el partido, y el resto se repiten dos veces, una para el ganador (\texttt{winner\_*}, \texttt{w\_*}) y otra para el perdedor (\texttt{loser\_*}, \texttt{l\_*}). Importarlo tal cual en MongoDB daría documentos planos, equivalentes a una tabla relacional, y no se aprovecharía el modelo de documentos.
 
-Por ello, antes de la carga se ha escrito un script en Python (\texttt{convertir\_csv\_a\_json.py}, incluido en el Anexo) que convierte cada fila en un documento siguiendo el modelo embebido. Los datos del ganador y del perdedor se agrupan en dos documentos embebidos, \texttt{ganador} y \texttt{perdedor}, ya que tienen una relación 1-1 con el partido y siempre se consultan junto a él, y sus estadísticas de saque se agrupan a su vez en un documento \texttt{estadisticas}. Además, el resultado, que en el CSV es un texto como \texttt{4-6 6-7(4) 6-4 7-6(3) 7-6(2)}, se separa en un array \texttt{sets} con un documento por cada set jugado, lo que permite consultar los sets de forma individual.
+Por ello, antes de la carga se ha escrito un script en Python (\texttt{convertir\_csv\_a\_json.py}, que se entrega junto al resto de ficheros) que convierte cada fila en un documento siguiendo el modelo embebido. Los datos del ganador y del perdedor se agrupan en dos documentos embebidos, \texttt{ganador} y \texttt{perdedor}, ya que tienen una relación 1-1 con el partido y siempre se consultan junto a él, y sus estadísticas de saque se agrupan a su vez en un documento \texttt{estadisticas}. Además, el resultado, que en el CSV es un texto como \texttt{4-6 6-7(4) 6-4 7-6(3) 7-6(2)}, se separa en un array \texttt{sets} con un documento por cada set jugado, lo que permite consultar los sets de forma individual.
 
 Durante la conversión se han tenido en cuenta varios casos particulares del dataset:
 
@@ -270,8 +270,7 @@ Hay que tener en cuenta que el ranking de cada jugador es el que tenía en la se
 
 El fichero \texttt{atp\_partidos\_2025.json} se ha importado con MongoDB Compass en la base de datos \texttt{tenis-2025}, dentro de la colección \texttt{partidos}.
 
-\resultado{carga_1}{Importación del fichero JSON con MongoDB Compass}
-\resultadoextra{carga_2}
+\resultado{carga_2}{Colección \texttt{partidos} después de la importación}
 
 La importación carga los 2944 partidos. A continuación se comprueba el número de documentos y la estructura de uno de ellos desde la consola.
 
@@ -280,7 +279,6 @@ La importación carga los 2944 partidos. A continuación se comprueba el número
 
 \rotulo{Resultado}
 \resultado{crud_1}{Número de documentos y estructura de un partido}
-\resultadoextra{crud_1_b}
 
 % ---------------------------------------------------------------------
 %  3. INSERCIÓN, ACTUALIZACIÓN, PROYECCIÓN Y FILTRADO
@@ -327,7 +325,6 @@ El campo \texttt{nivel} guarda un código que no se entiende por sí solo. Se cr
 
 \rotulo{Resultado}
 \resultado{crud_4}{Inserción de la colección \texttt{niveles}}
-\resultadoextra{crud_4_b}
 
 \rotulo{Interpretación}
 
@@ -343,7 +340,6 @@ Para probar las operaciones sobre un único documento se inserta el primer parti
 
 \rotulo{Resultado}
 \resultado{crud_5}{Inserción, actualización y borrado de un partido de 2026}
-\resultadoextra{crud_5_b}
 \resultadoextra{crud_5_c}
 
 \rotulo{Interpretación}
@@ -358,7 +354,6 @@ El partido se inserta con menos campos que el resto, sin estadísticas ni sets. 
 
 \rotulo{Resultado}
 \resultado{crud_6}{Finales de los cuatro Grand Slam de 2025}
-\resultadoextra{crud_6_b}
 
 \rotulo{Interpretación}
 
@@ -511,8 +506,7 @@ En esta consulta se agrupan los jugadores por tramos de altura con \texttt{\$buc
 \consulta{agg_6}
 
 \rotulo{Resultado}
-\resultado{agg_6}{Media de aces por partido según la altura}
-\resultadoextra{agg_6_b}
+\resultado{agg_6_b}{Media de aces por partido según la altura}
 
 \rotulo{Interpretación}
 
@@ -526,7 +520,6 @@ La media de aces aumenta en todos los tramos, desde 2.2 aces por partido en los 
 
 \rotulo{Resultado}
 \resultado{agg_7}{Victorias de Alcaraz y Sinner por mes}
-\resultadoextra{agg_7_b}
 \resultadoextra{agg_7_c}
 
 \rotulo{Interpretación}
@@ -538,7 +531,7 @@ Ninguno de los dos tiene victorias en julio, aunque Sinner gana Wimbledon. Esto 
 % ---------------------------------------------------------------------
 %  5. VISUALIZACIÓN CON PYTHON
 % ---------------------------------------------------------------------
-\newpage
+\bigskip
 \seccion{5}{Visualización con Python}
 
 Como parte adicional, en el notebook \texttt{graficas\_tenis.ipynb} se conecta a la base de datos desde Python con la librería pymongo, se lanzan algunas de las agregaciones anteriores y se representan con matplotlib. Las agregaciones son las mismas que en la consola, cambiando solo las claves, que van entre comillas, y \texttt{null} por \texttt{None}.
@@ -557,9 +550,19 @@ En la gráfica se ve claramente el periodo sin jugar de Sinner y que, en los mes
 
 Esta gráfica se obtiene directamente de la colección \texttt{jugadores} guardada con \texttt{\$out}, sin repetir la agregación, y muestra la distancia entre Sinner y Alcaraz y el resto de jugadores.
 
-\grafica{tiebreaks_superficie}{Porcentaje de sets que acaban en tiebreak por superficie}
-
-\grafica{aces_altura}{Media de aces por partido según la altura del jugador}
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{tiebreaks_superficie}
+    \caption{Sets que acaban en tiebreak por superficie}
+  \end{minipage}\hfill
+  \begin{minipage}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{aces_altura}
+    \caption{Aces por partido según la altura}
+  \end{minipage}
+\end{figure}
 
 En las dos últimas gráficas se ve el peso del saque según la superficie y según la altura del jugador, con una relación creciente en ambos casos.
 
@@ -576,14 +579,5 @@ Por debajo de ellos, el ranking no siempre anticipa al ganador. Jugadores como V
 En cuanto al juego, la superficie condiciona el desarrollo de los partidos. En hierba hay más tiebreaks y en tierra menos, lo que refleja la ventaja del saque en las superficies rápidas, y esa ventaja aumenta con la altura del jugador. En cambio, la duración de los partidos depende sobre todo del número de sets y no de la superficie, y la diferencia que aparece a primera vista en la hierba se debe al peso de Wimbledon.
 
 Por último, hay que tener en cuenta las limitaciones del dataset: faltan la duración de casi todo Roland Garros y las estadísticas de 193 partidos, y tanto el ranking como la fecha corresponden a la semana de inicio de cada torneo, lo que hay que tener presente al interpretar los resultados por mes o por ranking.
-
-% ---------------------------------------------------------------------
-%  ANEXO
-% ---------------------------------------------------------------------
-\newpage
-\section*{Anexo: Script de conversión de CSV a JSON}
-\addcontentsline{toc}{section}{Anexo: Script de conversión de CSV a JSON}
-
-\codigopython{convertir_csv_a_json}
 
 \end{document}
