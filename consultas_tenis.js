@@ -212,3 +212,53 @@ var fase4 = { $addFields: { "aces_por_juego_saque": { $divide: [ "$total_aces", 
 var fase5 = { $sort: { "aces_por_juego_saque": -1 } }
 var etapas = [ fase1, fase2, fase3, fase4, fase5 ]
 db.partidos.aggregate(etapas)
+
+// Porcentaje de sorpresas (gana el peor clasificado) por tipo de torneo
+var fase1 = { $match: { "ganador.ranking": { $ne: null }, "perdedor.ranking": { $ne: null } } }
+var es_sorpresa = { $cond: [ { $gt: [ "$ganador.ranking", "$perdedor.ranking" ] }, 1, 0 ] }
+var fase2 = { $group: { "_id": "$nivel", "partidos": { $sum: 1 }, "sorpresas": { $sum: es_sorpresa } } }
+var fase3 = { $lookup: { from: "niveles", localField: "_id", foreignField: "codigo", as: "info_nivel" } }
+var fase4 = { $unwind: "$info_nivel" }
+var fase5 = { $project: { "_id": 0, "nivel": "$info_nivel.nombre", "partidos": 1, "sorpresas": 1, "porcentaje": { $multiply: [ { $divide: [ "$sorpresas", "$partidos" ] }, 100 ] } } }
+var fase6 = { $sort: { "porcentaje": -1 } }
+var etapas = [ fase1, fase2, fase3, fase4, fase5, fase6 ]
+db.partidos.aggregate(etapas)
+
+// Las 5 mayores sorpresas por diferencia de ranking (sin Copa Davis ni torneos por equipos)
+var fase1 = { $match: { "ganador.ranking": { $ne: null }, "perdedor.ranking": { $ne: null }, "final": "completo", "nivel": { $in: [ "G", "M", "500", "250" ] } } }
+var fase2 = { $addFields: { "diferencia": { $subtract: [ "$ganador.ranking", "$perdedor.ranking" ] } } }
+var fase3 = { $sort: { "diferencia": -1 } }
+var fase4 = { $limit: 5 }
+var fase5 = { $project: { "_id": 0, "torneo": 1, "ronda": 1, "ganador.nombre": 1, "ganador.ranking": 1, "perdedor.nombre": 1, "perdedor.ranking": 1, "diferencia": 1 } }
+var etapas = [ fase1, fase2, fase3, fase4, fase5 ]
+db.partidos.aggregate(etapas)
+
+// Media de aces por partido segun la altura del jugador
+var jugadores = [ { "altura": "$ganador.altura", "aces": "$ganador.estadisticas.aces" }, { "altura": "$perdedor.altura", "aces": "$perdedor.estadisticas.aces" } ]
+var fase1 = { $match: { "con_estadisticas": true } }
+var fase2 = { $project: { "_id": 0, "jugadores": jugadores } }
+var fase3 = { $unwind: "$jugadores" }
+var fase4 = { $match: { "jugadores.altura": { $ne: null } } }
+var fase5 = { $bucket: { groupBy: "$jugadores.altura", boundaries: [ 165, 175, 180, 185, 190, 195, 200, 215 ], default: "Otros", output: { "partidos": { $sum: 1 }, "media_aces": { $avg: "$jugadores.aces" } } } }
+var etapas = [ fase1, fase2, fase3, fase4, fase5 ]
+db.partidos.aggregate(etapas)
+
+// Victorias de Alcaraz y Sinner por mes
+var fase1 = { $match: { "ganador.nombre": { $in: [ "Carlos Alcaraz", "Jannik Sinner" ] } } }
+var fase2 = { $addFields: { "fecha_date": { $toDate: "$fecha" } } }
+var fase3 = { $group: { "_id": { "jugador": "$ganador.nombre", "mes": { $month: "$fecha_date" } }, "victorias": { $sum: 1 } } }
+var fase4 = { $sort: { "_id.jugador": 1, "_id.mes": 1 } }
+var etapas = [ fase1, fase2, fase3, fase4 ]
+db.partidos.aggregate(etapas)
+
+// Guardar el balance de todos los jugadores en una coleccion nueva para el notebook
+var jugadores = [ { "nombre": "$ganador.nombre", "pais": "$ganador.pais", "victoria": 1 }, { "nombre": "$perdedor.nombre", "pais": "$perdedor.pais", "victoria": 0 } ]
+var fase1 = { $project: { "_id": 0, "jugadores": jugadores } }
+var fase2 = { $unwind: "$jugadores" }
+var fase3 = { $group: { "_id": "$jugadores.nombre", "pais": { $first: "$jugadores.pais" }, "partidos": { $sum: 1 }, "victorias": { $sum: "$jugadores.victoria" } } }
+var fase4 = { $addFields: { "porcentaje": { $multiply: [ { $divide: [ "$victorias", "$partidos" ] }, 100 ] } } }
+var fase5 = { $out: "jugadores" }
+var etapas = [ fase1, fase2, fase3, fase4, fase5 ]
+db.partidos.aggregate(etapas)
+db.jugadores.countDocuments({})
+db.jugadores.find().sort({ "victorias": -1 }).limit(3)
