@@ -13,7 +13,7 @@
 \newcommand{\preguntaanalisis}{¿Fue la temporada 2025 cosa de dos jugadores?}
 
 % ---------------------------------------------------------------------
-%  PAQUETES (mismo estilo que el TFG)
+%  PAQUETES
 % ---------------------------------------------------------------------
 \usepackage[spanish, es-tabla]{babel}
 \usepackage[utf8]{inputenc}
@@ -42,9 +42,8 @@
 \pagestyle{fancy}
 \fancyhf{}
 \renewcommand{\headrulewidth}{0.4pt}
-\fancyhead[L]{\small Hugo Lucendo Romero}
 \fancyhead[R]{\includegraphics[height=1.05cm]{ucm}}
-\fancyhead[C]{\small Tarea Final NoSQL -- Temporada ATP 2025}
+\fancyhead[L]{\small Tarea Final NoSQL -- Temporada ATP 2025}
 \fancyfoot[C]{\thepage}
 
 \fancypagestyle{portada}{%
@@ -109,7 +108,6 @@
   aboveskip=0pt, belowskip=0pt
 }
 
-% Bloque de código: lo único que va en recuadro
 \tcbset{
   codigo/.style={enhanced, unbreakable, colback=black!3, colframe=black!35,
                  boxrule=0.4pt, arc=0pt, left=4pt, right=4pt, top=3pt, bottom=3pt,
@@ -123,54 +121,31 @@
   \tcbinputlisting{codigolargo, listing only, listing file=py/#1.py,
                    listing options={style=python}}}
 
-% Rótulos ("Consulta", "Resultado", "Interpretación")
 \newcommand{\rotulo}[1]{\par\textbf{#1}\par\nobreak\vspace{-4pt}}
 
-% Captura del resultado con pie numerado
-%   #1 archivo (sin .png)   #2 pie de tabla
+% Captura del resultado
+%   #1 archivo (sin .png)   #2 pie de figura
 \newcommand{\resultado}[2]{%
-  \IfFileExists{img/#1.png}{%
-    \begin{table}[H]
-      \centering
-      \vspace{6pt}
-      \rule{\linewidth}{0.8pt}\\[3pt]
-      \includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio]{#1}\\[-1pt]
-      \rule{\linewidth}{0.8pt}
-      \caption{#2}
-    \end{table}}{%
-    \begin{table}[H]
-      \centering
-      \fbox{\parbox{0.9\linewidth}{\centering\small\vspace{1cm}
-        Captura pendiente: \texttt{\detokenize{img/#1.png}}\vspace{1cm}}}
-      \caption{#2}
-    \end{table}}}
-
-% Captura adicional (sin pie) solo si existe el archivo
-\newcommand{\resultadoextra}[1]{%
-  \IfFileExists{img/#1.png}{%
-    \begin{center}\vspace{-4pt}
-      \includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio]{#1}\\[-1pt]
-      \rule{\linewidth}{0.8pt}
-    \end{center}}{}}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio]{#1}
+    \caption{#2}
+  \end{figure}}
 
 % Dos capturas en fila con un solo pie
-%   #1 y #2 archivos (sin .png)   #3 pie de tabla
 \newcommand{\resultadodoble}[3]{%
-  \begin{table}[H]
+  \begin{figure}[H]
     \centering
-    \vspace{6pt}
-    \rule{\linewidth}{0.8pt}\\[3pt]
     \begin{minipage}[t]{0.49\linewidth}\vspace{0pt}
       \includegraphics[width=\linewidth]{#1}
     \end{minipage}\hfill
     \begin{minipage}[t]{0.49\linewidth}\vspace{0pt}
       \includegraphics[width=\linewidth]{#2}
-    \end{minipage}\\[-1pt]
-    \rule{\linewidth}{0.8pt}
+    \end{minipage}
     \caption{#3}
-  \end{table}}
+  \end{figure}}
 
-% Gráfica del notebook con pie numerado
+% Gráfica del notebook
 \newcommand{\grafica}[2]{%
   \begin{figure}[H]
     \centering
@@ -214,17 +189,17 @@
 \newpage
 \seccion{1}{Introducción}
 
-Este documento presenta el análisis de la temporada 2025 del circuito ATP mediante una base de datos MongoDB. El trabajo incluye la carga del dataset, consultas de inserción, actualización, proyección y filtrado, consultas con el pipeline de agregación y, como parte adicional, la conexión a la base de datos desde Python para representar algunos de los resultados en gráficas.
+En este trabajo se analiza la temporada 2025 del circuito ATP con MongoDB. Se carga el dataset, se realizan consultas de inserción, actualización, proyección y filtrado y consultas con el pipeline de agregación y, como parte adicional, se representan algunos resultados en gráficas desde Python.
 
-El análisis gira en torno a una pregunta:
+El análisis parte de la siguiente pregunta:
 
 \begin{center}
   \textit{\preguntaanalisis}
 \end{center}
 
-En 2025 Carlos Alcaraz y Jannik Sinner se repartieron los cuatro Grand Slam, pero eso no significa por sí solo que el resto de jugadores no tuviera peso en la temporada. Por ello, además de comparar a ambos con el resto del circuito, se estudia cómo influyen en los partidos factores como la superficie, el número de sets o la altura de los jugadores, y hasta qué punto el ranking anticipa al ganador.
+Alcaraz y Sinner se repartieron los cuatro Grand Slam de 2025. Además de compararlos con el resto del circuito, se estudia la influencia de la superficie, el número de sets y la altura de los jugadores en los partidos.
 
-Cada consulta se presenta en el orden consulta, resultado e interpretación. Todas las consultas se encuentran también en el script \texttt{consultas\_tenis.js} que se entrega junto a este documento, de forma que se pueden ejecutar en el mismo orden.
+Cada apartado incluye la consulta, la captura del resultado y su interpretación. Las consultas están en el script \texttt{consultas\_tenis.js}, en el mismo orden.
 
 % ---------------------------------------------------------------------
 %  2. DATASET
@@ -233,28 +208,28 @@ Cada consulta se presenta en el orden consulta, resultado e interpretación. Tod
 \seccion{2}{Dataset}
 \subseccion{2.1}{Origen de los datos}
 
-Los datos proceden de TML-Database (\url{https://github.com/Tennismylife/TML-Database}), un repositorio público que recoge todos los partidos del circuito ATP a partir de la información oficial de la ATP y que sigue el mismo formato que la conocida base de datos de Jeff Sackmann. Se ha utilizado el fichero de la temporada 2025, que contiene 2944 partidos jugados en 197 torneos entre el 29/12/2024 y el 22/12/2025, incluyendo Grand Slam, Masters 1000, ATP 500, ATP 250, ATP Finals, Copa Davis y otras competiciones como la United Cup, la Laver Cup o las Next Gen ATP Finals.
+Los datos proceden del repositorio público TML-Database (\url{https://github.com/Tennismylife/TML-Database}), que recoge los partidos del circuito ATP con el mismo formato que la base de datos de Jeff Sackmann. Se utiliza el fichero de la temporada 2025: 2944 partidos de 197 torneos jugados entre el 29/12/2024 y el 22/12/2025, entre ellos Grand Slam, Masters 1000, ATP 500, ATP 250, ATP Finals, Copa Davis, United Cup, Laver Cup y Next Gen ATP Finals.
 
 \subseccion{2.2}{Transformación de CSV a JSON}
 
-El fichero original es un CSV en el que cada partido ocupa una fila con 49 columnas: unas describen el torneo y el partido, y el resto se repiten dos veces, una para el ganador (\texttt{winner\_*}, \texttt{w\_*}) y otra para el perdedor (\texttt{loser\_*}, \texttt{l\_*}). Importarlo tal cual en MongoDB daría documentos planos, equivalentes a una tabla relacional, y no se aprovecharía el modelo de documentos.
+El fichero original es un CSV con un partido por fila y 49 columnas. Las columnas de cada jugador se repiten para el ganador (\texttt{winner\_*}, \texttt{w\_*}) y para el perdedor (\texttt{loser\_*}, \texttt{l\_*}).
 
-Por ello, antes de la carga se ha escrito un script en Python (\texttt{convertir\_csv\_a\_json.py}, que se entrega junto al resto de ficheros) que convierte cada fila en un documento siguiendo el modelo embebido. Los datos del ganador y del perdedor se agrupan en dos documentos embebidos, \texttt{ganador} y \texttt{perdedor}, ya que tienen una relación 1-1 con el partido y siempre se consultan junto a él, y sus estadísticas de saque se agrupan a su vez en un documento \texttt{estadisticas}. Además, el resultado, que en el CSV es un texto como \texttt{4-6 6-7(4) 6-4 7-6(3) 7-6(2)}, se separa en un array \texttt{sets} con un documento por cada set jugado, lo que permite consultar los sets de forma individual.
+Se crea un script en Python, \texttt{convertir\_csv\_a\_json.py}, que convierte cada fila en un documento con modelo embebido. Los datos de cada jugador se agrupan en los documentos \texttt{ganador} y \texttt{perdedor}, con relación 1-1 con el partido, y sus estadísticas de saque en el subdocumento \texttt{estadisticas}. El resultado, por ejemplo \texttt{4-6 6-7(4) 6-4 7-6(3) 7-6(2)}, se separa en el array \texttt{sets}, con un documento por set.
 
-Durante la conversión se han tenido en cuenta varios casos particulares del dataset:
+En la conversión se tratan los siguientes casos:
 
 \begin{itemize}
-  \item Los valores vacíos del CSV se guardan como \texttt{null} y los números se convierten a entero o decimal.
-  \item La fecha se transforma del formato \texttt{20250526} a \texttt{2025-05-26}, para poder convertirla después a tipo fecha con \texttt{\$toDate}.
-  \item En los sets con tiebreak el CSV solo indica los puntos de quien lo pierde, por ejemplo \texttt{7-6(4)}. Los puntos de quien lo gana se calculan como 7 o dos más que el rival, salvo en el quinto set de los Grand Slam, donde el tiebreak se juega a 10 puntos.
-  \item En la Copa Davis y la Laver Cup el tercer set se sustituye por un súper tiebreak a 10 puntos (\texttt{[10-8]}), que se guarda como un set sin juegos y solo con los puntos del tiebreak.
-  \item Las retiradas (\texttt{RET}) y los partidos no disputados (\texttt{W/O}) se identifican en un campo \texttt{final}.
-  \item La última fila del CSV venía incompleta a mitad de las estadísticas (la final de las Next Gen ATP Finals). El resto de datos del partido es correcto, por lo que se ha mantenido el partido dejando sus estadísticas vacías.
+  \item Los valores vacíos se guardan como \texttt{null} y los números como entero o decimal.
+  \item La fecha pasa de \texttt{20250526} a \texttt{2025-05-26}, para convertirla después con \texttt{\$toDate}.
+  \item En los tiebreaks el CSV solo indica los puntos del jugador que lo pierde, por ejemplo \texttt{7-6(4)}. Los del que lo gana se calculan como el máximo entre 7 (10 en el quinto set de los Grand Slam) y los puntos del rival más dos.
+  \item El súper tiebreak de la Copa Davis y la Laver Cup (\texttt{[10-8]}) se guarda como un set sin juegos, solo con los puntos del tiebreak.
+  \item Las retiradas (\texttt{RET}) y los walkovers (\texttt{W/O}) se indican en el campo \texttt{final}.
+  \item La última fila, la final de las Next Gen ATP Finals, está incompleta. Se mantiene el partido con las estadísticas vacías.
 \end{itemize}
 
 \subseccion{2.3}{Estructura de los documentos}
 
-Cada documento de la colección \texttt{partidos} representa un partido. En la Tabla \ref{tab:campos} se describen los campos más relevantes para el análisis.
+Cada documento de la colección \texttt{partidos} es un partido. La Tabla \ref{tab:campos} recoge los campos principales.
 
 \begin{table}[H]
   \centering
@@ -281,15 +256,15 @@ Cada documento de la colección \texttt{partidos} representa un partido. En la T
   \label{tab:campos}
 \end{table}
 
-Hay que tener en cuenta que el ranking de cada jugador es el que tenía en la semana de inicio del torneo, por lo que es el mismo en todas las rondas, y que la fecha corresponde también al inicio del torneo y no al día del partido.
+El ranking es el de la semana de inicio del torneo, igual en todas las rondas, y la fecha es también la de inicio del torneo.
 
 \subseccion{2.4}{Carga en MongoDB}
 
-El fichero \texttt{atp\_partidos\_2025.json} se ha importado con MongoDB Compass en la base de datos \texttt{tenis-2025}, dentro de la colección \texttt{partidos}.
+El fichero \texttt{atp\_partidos\_2025.json} se importa con MongoDB Compass en la colección \texttt{partidos} de la base de datos \texttt{tenis-2025}.
 
 \resultado{carga_2}{Colección \texttt{partidos} después de la importación}
 
-La importación carga los 2944 partidos. A continuación se comprueba el número de documentos y la estructura de uno de ellos desde la consola.
+Desde la consola se comprueban el número de documentos y la estructura de un partido.
 
 \rotulo{Consulta}
 \consulta{crud_1}
@@ -305,7 +280,7 @@ La importación carga los 2944 partidos. A continuación se comprueba el número
 
 \pregunta{3.1}{Traducción de las superficies}
 
-Las superficies vienen en inglés (Hard, Clay y Grass). Para que los resultados se lean mejor, se traducen al castellano con un \texttt{updateMany} por cada superficie.
+Las superficies vienen en inglés (Hard, Clay y Grass) y se traducen con un \texttt{updateMany} por superficie.
 
 \rotulo{Consulta}
 \consulta{crud_2}
@@ -315,12 +290,12 @@ Las superficies vienen en inglés (Hard, Clay y Grass). Para que los resultados 
 
 \rotulo{Interpretación}
 
-Se modifican 1860 partidos de pista dura, 787 de tierra y 297 de hierba, que suman los 2944 partidos de la colección. Ya se ve desde el principio que la temporada se juega sobre todo en pista dura, casi dos de cada tres partidos, mientras que la hierba apenas supone un 10\%.
+Se modifican 1860 partidos en pista dura, 787 en tierra y 297 en hierba, 2944 en total. La pista dura supone casi dos tercios de los partidos y la hierba un 10\%.
 
 \bigskip
 \pregunta{3.2}{Partidos con y sin estadísticas}
 
-No todos los partidos tienen estadísticas de saque. Como en los datos todas las estadísticas aparecen o faltan a la vez, basta con comprobar los aces del ganador. Se añade un campo \texttt{con\_estadisticas} para poder filtrar después estos partidos.
+Las estadísticas de saque faltan en algunos partidos, siempre todas a la vez, por lo que basta con comprobar los aces del ganador. Se añade el campo \texttt{con\_estadisticas} para filtrar estos partidos.
 
 \rotulo{Consulta}
 \consulta{crud_3}
@@ -330,12 +305,12 @@ No todos los partidos tienen estadísticas de saque. Como en los datos todas las
 
 \rotulo{Interpretación}
 
-193 partidos no tienen estadísticas, un 6.6\% del total, y los 2751 restantes sí. La segunda actualización usa \texttt{\$exists: false}, ya que después de la primera los únicos documentos que no tienen el campo son justo los que tienen estadísticas. Todas las consultas posteriores sobre aces o saque se harán sobre los partidos con \texttt{con\_estadisticas: true}.
+193 partidos no tienen estadísticas (6.6\%) y 2751 sí. La segunda actualización usa \texttt{\$exists: false} porque, tras la primera, solo los partidos con estadísticas no tienen el campo. Las consultas sobre el saque se filtran con \texttt{con\_estadisticas: true}.
 
 \bigskip
 \pregunta{3.3}{Colección de niveles de torneo}
 
-El campo \texttt{nivel} guarda un código que no se entiende por sí solo. Se crea una segunda colección, \texttt{niveles}, con el nombre de cada nivel y los puntos que se lleva el campeón, que se utilizará más adelante en una agregación.
+Se crea la colección \texttt{niveles} con el nombre de cada código de nivel y los puntos del campeón, que se usa después en un \texttt{\$lookup}.
 
 \rotulo{Consulta}
 \consulta{crud_4}
@@ -345,12 +320,12 @@ El campo \texttt{nivel} guarda un código que no se entiende por sí solo. Se cr
 
 \rotulo{Interpretación}
 
-Se insertan los 7 niveles. La Copa Davis y el grupo de otras competiciones no tienen el campo \texttt{puntos\_campeon}, ya que no reparten puntos fijos por ganar el torneo, y MongoDB permite guardarlos igualmente sin ese campo, al no exigir que todos los documentos de una colección tengan la misma estructura.
+Se insertan los 7 niveles. La Copa Davis y el nivel de otras competiciones no llevan \texttt{puntos\_campeon}, ya que no reparten puntos fijos por título.
 
 \bigskip
 \pregunta{3.4}{Inserción, modificación y borrado de un partido}
 
-Para probar las operaciones sobre un único documento se inserta el primer partido de la temporada 2026, solo con algunos campos, se completa con su duración y sus sets y, como el análisis es de 2025, se borra al final.
+Se inserta el primer partido de la temporada 2026 con solo algunos campos, se completa con su duración y sus sets y se borra.
 
 \rotulo{Consulta}
 \consulta{crud_5}
@@ -360,7 +335,7 @@ Para probar las operaciones sobre un único documento se inserta el primer parti
 
 \rotulo{Interpretación}
 
-El partido se inserta con menos campos que el resto, sin estadísticas ni sets. Con \texttt{\$set} se añade el campo \texttt{minutos}, que no existía, y con \texttt{\$push} y \texttt{\$each} se crea el array \texttt{sets} con los dos sets a la vez. Tras el \texttt{deleteOne} la colección vuelve a tener 2944 partidos.
+\texttt{\$set} añade el campo \texttt{minutos}, que no existía, y \texttt{\$push} con \texttt{\$each} crea el array \texttt{sets} con los dos sets. Tras el \texttt{deleteOne} vuelven a quedar 2944 partidos.
 
 \bigskip
 \pregunta{3.5}{Finales de los Grand Slam}
@@ -373,9 +348,9 @@ El partido se inserta con menos campos que el resto, sin estadísticas ni sets. 
 
 \rotulo{Interpretación}
 
-Sinner gana el Open de Australia y Wimbledon, y Alcaraz Roland Garros y el US Open, por lo que entre los dos se reparten los cuatro grandes. Además, tres de las cuatro finales las juegan entre ellos, y solo Zverev consigue colarse en la de Australia.
+Sinner gana el Open de Australia y Wimbledon, y Alcaraz Roland Garros y el US Open. Tres de las cuatro finales son entre ellos; la de Australia la juega Sinner contra Zverev.
 
-Llama la atención la duración de la final de Roland Garros, 329 minutos, el doble que las otras tres (entre 162 y 184 minutos). Alcaraz la gana remontando dos sets en contra, y el quinto set se decide en un tiebreak a 10 puntos.
+La final de Roland Garros dura 329 minutos, frente a los 162-184 de las demás. Alcaraz remonta dos sets en contra y gana el quinto en un tiebreak a 10 puntos.
 
 \bigskip
 \pregunta{3.6}{Partidos entre Alcaraz y Sinner}
@@ -388,7 +363,7 @@ Llama la atención la duración de la final de Roland Garros, 329 minutos, el do
 
 \rotulo{Interpretación}
 
-Se enfrentan seis veces y todas en una final, en Roma, Roland Garros, Wimbledon, Cincinnati, el US Open y las ATP Finals, es decir, en las tres superficies. Alcaraz gana cuatro y Sinner dos, aunque una de las victorias de Alcaraz, la de Cincinnati, llega por retirada de Sinner con 5-0 en el primer set, por lo que en partidos completos el balance es más ajustado de lo que indica el 4-2.
+Se enfrentan seis veces, todas en finales: Roma, Roland Garros, Wimbledon, Cincinnati, US Open y ATP Finals, en las tres superficies. Alcaraz gana cuatro y Sinner dos. La victoria de Alcaraz en Cincinnati es por retirada de Sinner con 5-0 en el primer set.
 
 \bigskip
 \pregunta{3.7}{Partidos más largos de la temporada}
@@ -401,12 +376,12 @@ Se enfrentan seis veces y todas en una final, en Roma, Roland Garros, Wimbledon,
 
 \rotulo{Interpretación}
 
-Los cinco son de Grand Slam y se van al quinto set, lo cual es lógico porque es el único torneo en el que se juega al mejor de cinco sets. Sin embargo, salvo la final de Roland Garros, todos son de primeras rondas, y todos tienen al menos dos tiebreaks. Los partidos más largos no salen de muchos juegos, sino de sets muy igualados.
+Los cinco son partidos de Grand Slam a cinco sets, el único torneo al mejor de cinco. Salvo la final de Roland Garros, son de primeras rondas, y todos tienen al menos dos tiebreaks.
 
 \bigskip
 \pregunta{3.8}{Consultas sobre el array de sets}
 
-En esta consulta se cuentan primero los partidos que llegan al quinto set y después los partidos ganados por un jugador que perdió algún set 6-7, comparando el resultado con y sin \texttt{\$elemMatch}.
+Se cuentan los partidos a cinco sets y los partidos en los que el ganador perdió algún set 6-7, con y sin \texttt{\$elemMatch}.
 
 \rotulo{Consulta}
 \consulta{crud_9}
@@ -416,7 +391,7 @@ En esta consulta se cuentan primero los partidos que llegan al quinto set y desp
 
 \rotulo{Interpretación}
 
-101 partidos llegan al quinto set. En la segunda parte, sin \texttt{\$elemMatch} salen 381 partidos y con \texttt{\$elemMatch} 281. La diferencia se debe a que, sin \texttt{\$elemMatch}, cada condición se puede cumplir en un set distinto: un partido como \texttt{6-4 5-7 6-3} cuenta, porque tiene un set con 6 juegos del ganador y otro con 7 del perdedor, aunque ningún set acabe 6-7. Con \texttt{\$elemMatch} las dos condiciones se tienen que cumplir en el mismo set, que es lo que se busca, por lo que 100 de los partidos de la primera consulta son falsos positivos.
+101 partidos llegan al quinto set. Sin \texttt{\$elemMatch} salen 381 partidos y con \texttt{\$elemMatch} 281. Sin \texttt{\$elemMatch} cada condición puede cumplirse en un set distinto: un partido \texttt{6-4 5-7 6-3} cuenta aunque ningún set acabe 6-7. Con \texttt{\$elemMatch} las dos condiciones se aplican al mismo set, por lo que los 100 partidos de diferencia son falsos positivos.
 
 % ---------------------------------------------------------------------
 %  4. PIPELINE DE AGREGACIÓN
@@ -434,7 +409,7 @@ En esta consulta se cuentan primero los partidos que llegan al quinto set y desp
 
 \rotulo{Interpretación}
 
-Los partidos en hierba son los más largos, con 130 minutos de media, frente a 115 en pista dura y 109 en tierra. El resultado es curioso, porque la hierba es la superficie más rápida y se esperaría que los puntos y los partidos fueran más cortos, así que en la siguiente consulta se separan los partidos según el número de sets.
+La hierba tiene la mayor duración media, 130 minutos, frente a 115 en pista dura y 109 en tierra. En la siguiente consulta se separa por número de sets.
 
 \bigskip
 \pregunta{4.2}{Duración media por superficie y número de sets}
@@ -447,14 +422,14 @@ Los partidos en hierba son los más largos, con 130 minutos de media, frente a 1
 
 \rotulo{Interpretación}
 
-Al comparar partidos iguales, al mejor de tres sets, la hierba pasa a ser la superficie con los partidos más cortos (106.9 minutos), aunque las tres están muy cerca. La media anterior salía más alta porque 127 de los 297 partidos en hierba son de Wimbledon, al mejor de cinco sets, mientras que en pista dura esa proporción es mucho menor.
+Al mejor de tres sets la hierba tiene los partidos más cortos (106.9 minutos), con las tres superficies muy próximas. La media de la consulta anterior está influida por Wimbledon: 127 de los 297 partidos en hierba son al mejor de cinco sets.
 
-Por otro lado, en tierra solo aparece un partido al mejor de cinco sets, cuando Roland Garros tiene 127. Revisando los datos, Roland Garros es el torneo con más partidos sin duración: solo la tiene la final. Por tanto, la media de la tierra no incluye los partidos largos de Roland Garros y hay que tomarla con cuidado.
+En tierra solo hay un partido al mejor de cinco con duración, aunque Roland Garros tiene 127, ya que en este torneo solo la final tiene el campo \texttt{minutos}. La media de la tierra no incluye los partidos de Roland Garros.
 
 \bigskip
 \pregunta{4.3}{Títulos y puntos por jugador}
 
-En esta consulta se une cada final con la colección \texttt{niveles} mediante \texttt{\$lookup} para saber cuántos puntos da cada título.
+Se une cada final con la colección \texttt{niveles} mediante \texttt{\$lookup} para obtener los puntos de cada título.
 
 \rotulo{Consulta}
 \consulta{agg_3}
@@ -464,16 +439,14 @@ En esta consulta se une cada final con la colección \texttt{niveles} mediante \
 
 \rotulo{Interpretación}
 
-Alcaraz gana 8 títulos que suman 8500 puntos y Sinner 6 que suman 7500. Entre los dos acumulan 16000 puntos solo en títulos, frente a los 3500 que suman los tres siguientes juntos. Alcaraz gana más torneos y en las tres superficies, mientras que Sinner gana menos, pero casi todos son de los más importantes.
+Alcaraz suma 8 títulos y 8500 puntos y Sinner 6 títulos y 7500 puntos, 16000 entre los dos frente a los 3500 de los tres siguientes. Alcaraz gana títulos en las tres superficies y Sinner concentra los suyos en torneos de mayor categoría.
 
-El caso de Bublik muestra la diferencia entre ganar muchos títulos y ganar títulos importantes, ya que con 4 títulos suma los mismos puntos que Ruud con 2. En el quinto puesto aparece Valentin Vacherot, que gana el Masters 1000 de Shanghái siendo el número 202 del mundo.
-
-Los puntos están simplificados, ya que solo se cuentan los que da ganar el torneo y no los de cada ronda, pero sirven para comparar el peso de los títulos de cada jugador.
+Bublik, con 4 títulos, suma los mismos puntos que Ruud con 2. Vacherot entra en los cinco primeros al ganar el Masters 1000 de Shanghái con el ranking 202. Solo se cuentan los puntos del campeón, no los de cada ronda.
 
 \bigskip
 \pregunta{4.4}{Balance de victorias de todos los jugadores}
 
-Para calcular los partidos jugados por cada jugador hay que tener en cuenta que aparece unas veces como ganador y otras como perdedor. Por eso, cada partido se transforma en un array con los dos jugadores y se separa con \texttt{\$unwind}. El resultado se guarda con \texttt{\$out} en una colección nueva, \texttt{jugadores}, para no tener que volver a calcularlo.
+Cada jugador aparece como ganador o como perdedor, por lo que cada partido se transforma en un array con los dos jugadores y se separa con \texttt{\$unwind}. El resultado se guarda con \texttt{\$out} en la colección \texttt{jugadores}.
 
 \rotulo{Consulta}
 \consulta{agg_4}
@@ -481,7 +454,7 @@ Para calcular los partidos jugados por cada jugador hay que tener en cuenta que 
 \rotulo{Resultado}
 \resultado{agg_4}{Creación de la colección \texttt{jugadores} con \texttt{\$out}}
 
-Una vez guardada, se consulta directamente la colección \texttt{jugadores} para obtener los mejores porcentajes de victoria entre los jugadores con al menos 40 partidos.
+Sobre la colección \texttt{jugadores} se obtienen los mejores porcentajes de victoria con un mínimo de 40 partidos.
 
 \rotulo{Consulta}
 \consulta{agg_4b}
@@ -491,9 +464,7 @@ Una vez guardada, se consulta directamente la colección \texttt{jugadores} para
 
 \rotulo{Interpretación}
 
-La colección \texttt{jugadores} tiene 455 jugadores distintos. Sinner es el jugador con mejor porcentaje de victorias (90.6\%) por delante de Alcaraz (88.75\%), aunque Alcaraz gana más partidos, 71 frente a 58, porque juega 16 partidos más. Esto se explica porque Sinner no juega entre febrero y abril, como se ve en la consulta 4.7.
-
-Detrás de ellos hay un salto de más de diez puntos hasta Djokovic (78\%), que juega pocos torneos pero los aprovecha. Zverev, que gana tantos partidos como Sinner, se queda en un 69.9\% porque necesita 83 partidos para conseguirlo.
+La colección tiene 455 jugadores. Sinner tiene el mejor porcentaje (90.6\%) y Alcaraz el segundo (88.75\%), aunque Alcaraz gana más partidos, 71 frente a 58, al jugar 16 más (apartado 4.7). Djokovic es tercero con un 78\%. Zverev gana los mismos partidos que Sinner, pero en 83 partidos, y se queda en un 69.9\%.
 
 \bigskip
 \pregunta{4.5}{Porcentaje de sets que acaban en tiebreak por superficie}
@@ -506,12 +477,12 @@ Detrás de ellos hay un salto de más de diez puntos hasta Djokovic (78\%), que 
 
 \rotulo{Interpretación}
 
-En hierba el 22.2\% de los sets acaba en tiebreak, frente al 19.5\% en pista dura y el 14.7\% en tierra. En la hierba el saque tiene más ventaja y es más difícil romperlo, por lo que los sets llegan más veces al 6-6, mientras que en tierra hay más breaks y los sets se deciden antes. Los súper tiebreaks de la Copa Davis se excluyen con el \texttt{\$match}, ya que no son sets con juegos.
+En hierba acaba en tiebreak el 22.2\% de los sets, en pista dura el 19.5\% y en tierra el 14.7\%, en línea con la mayor ventaja del saque en las superficies rápidas. El \texttt{\$match} excluye los súper tiebreaks, que no tienen juegos.
 
 \bigskip
 \pregunta{4.6}{Aces según la altura del jugador}
 
-En esta consulta se agrupan los jugadores por tramos de altura con \texttt{\$bucket} y se calcula la media de aces por partido en cada tramo.
+Se agrupan los jugadores por tramos de altura con \texttt{\$bucket} y se calcula la media de aces por partido.
 
 \rotulo{Consulta}
 \consulta{agg_6}
@@ -521,7 +492,7 @@ En esta consulta se agrupan los jugadores por tramos de altura con \texttt{\$buc
 
 \rotulo{Interpretación}
 
-La media de aces aumenta en todos los tramos, desde 2.2 aces por partido en los jugadores de menos de 1.75 metros hasta 12.4 en los de más de 2 metros, casi seis veces más. La altura permite sacar desde más arriba y con un ángulo mejor, y los datos lo reflejan de forma muy clara. El tramo con más partidos es el de 1.85 a 1.89 metros, que es la altura más habitual en el circuito.
+La media de aces crece en todos los tramos, de 2.2 por partido por debajo de 1.75 metros a 12.4 por encima de 2 metros. El tramo con más partidos es el de 1.85 a 1.89 metros.
 
 \bigskip
 \pregunta{4.7}{Victorias de Alcaraz y Sinner por mes}
@@ -534,9 +505,9 @@ La media de aces aumenta en todos los tramos, desde 2.2 aces por partido en los 
 
 \rotulo{Interpretación}
 
-Sinner no tiene victorias en febrero, marzo ni abril, ya que en 2025 cumplió una sanción de tres meses, y vuelve en mayo directamente con 11 victorias. Durante esos meses Alcaraz suma 20 victorias, lo que explica buena parte de su diferencia de partidos ganados en la temporada.
+Sinner no tiene victorias de febrero a abril por su sanción de tres meses y vuelve en mayo con 11. En esos meses Alcaraz suma 20 victorias, que explican buena parte de la diferencia de partidos ganados.
 
-Ninguno de los dos tiene victorias en julio, aunque Sinner gana Wimbledon. Esto se debe a que la fecha de los partidos es la de inicio del torneo y Wimbledon empezó el 30 de junio, por lo que todas sus victorias cuentan en junio. También destaca octubre, en el que Sinner suma 10 victorias y Alcaraz ninguna.
+Ninguno tiene victorias en julio, aunque Sinner gana Wimbledon, porque la fecha es la de inicio del torneo (30 de junio). En octubre Sinner suma 10 victorias y Alcaraz ninguna.
 
 % ---------------------------------------------------------------------
 %  5. VISUALIZACIÓN CON PYTHON
@@ -544,21 +515,21 @@ Ninguno de los dos tiene victorias en julio, aunque Sinner gana Wimbledon. Esto 
 \bigskip
 \seccion{5}{Visualización con Python}
 
-Como parte adicional, en el notebook \texttt{graficas\_tenis.ipynb} se conecta a la base de datos desde Python con la librería pymongo, se lanzan algunas de las agregaciones anteriores y se representan con matplotlib. Las agregaciones son las mismas que en la consola, cambiando solo las claves, que van entre comillas, y \texttt{null} por \texttt{None}.
+Como parte adicional, el notebook \texttt{graficas\_tenis.ipynb} se conecta a la base de datos con pymongo, lanza algunas de las agregaciones anteriores y representa los resultados con matplotlib. Las agregaciones son las mismas que en la consola, con las claves entre comillas y \texttt{None} en lugar de \texttt{null}.
 
 \codigopython{conexion}
 
-En el caso de las victorias por mes, los meses sin victorias no aparecen en el resultado de la agregación, por lo que se crean dos listas de 12 meses a cero y se rellenan con los resultados.
+Los meses sin victorias no aparecen en la agregación, por lo que se parte de dos listas de 12 ceros que se rellenan con los resultados.
 
 \codigopython{meses}
 
 \grafica{victorias_mes}{Victorias de Alcaraz y Sinner por mes en 2025}
 
-En la gráfica se ve claramente el periodo sin jugar de Sinner y que, en los meses en los que juegan los dos, sus victorias son muy parecidas, salvo en octubre.
+Se observa el periodo sin competir de Sinner y un número de victorias similar de ambos en el resto de meses, salvo en octubre.
 
 \grafica{top10_porcentaje}{Top 10 en porcentaje de victorias (mínimo 40 partidos)}
 
-Esta gráfica se obtiene directamente de la colección \texttt{jugadores} guardada con \texttt{\$out}, sin repetir la agregación, y muestra la distancia entre Sinner y Alcaraz y el resto de jugadores.
+Esta gráfica se obtiene de la colección \texttt{jugadores}, sin repetir la agregación.
 
 \begin{figure}[H]
   \centering
@@ -574,7 +545,7 @@ Esta gráfica se obtiene directamente de la colección \texttt{jugadores} guarda
   \end{minipage}
 \end{figure}
 
-En las dos últimas gráficas se ve el peso del saque según la superficie y según la altura del jugador, con una relación creciente en ambos casos.
+Las dos gráficas muestran el peso del saque: más tiebreaks en las superficies rápidas y más aces a mayor altura.
 
 % ---------------------------------------------------------------------
 %  6. CONCLUSIONES
@@ -582,12 +553,12 @@ En las dos últimas gráficas se ve el peso del saque según la superficie y seg
 \newpage
 \seccion{6}{Conclusiones}
 
-Volviendo a la pregunta inicial, los datos indican que la temporada 2025 sí fue en gran medida cosa de dos jugadores. Alcaraz y Sinner se reparten los cuatro Grand Slam, juegan seis finales entre ellos, son los únicos con más de 40 partidos que superan el 80\% de victorias y acumulan más del cuádruple de puntos en títulos que los tres siguientes juntos. Entre ellos la temporada está muy igualada: Alcaraz gana más partidos y más títulos, pero Sinner tiene mejor porcentaje de victorias pese a estar tres meses sin competir.
+Los datos indican que la temporada 2025 fue en gran medida cosa de dos jugadores. Alcaraz y Sinner se reparten los cuatro Grand Slam, juegan seis finales entre ellos, son los únicos con más de 40 partidos por encima del 80\% de victorias y suman más del cuádruple de puntos en títulos que los tres siguientes. Entre ellos la temporada está igualada: Alcaraz gana más partidos y títulos y Sinner tiene mejor porcentaje pese a pasar tres meses sin competir.
 
-Por debajo de ellos, el ranking no siempre anticipa al ganador. Jugadores como Vacherot, que gana un Masters 1000 siendo el número 202, muestran que el resto del circuito también tiene margen para dar sorpresas.
+Fuera de ellos, el ranking no siempre anticipa al ganador, como muestra el título de Vacherot en Shanghái con el ranking 202.
 
-En cuanto al juego, la superficie condiciona el desarrollo de los partidos. En hierba hay más tiebreaks y en tierra menos, lo que refleja la ventaja del saque en las superficies rápidas, y esa ventaja aumenta con la altura del jugador. En cambio, la duración de los partidos depende sobre todo del número de sets y no de la superficie, y la diferencia que aparece a primera vista en la hierba se debe al peso de Wimbledon.
+La superficie influye en el juego: en hierba hay más tiebreaks y en tierra menos, y los aces aumentan con la altura del jugador. La duración depende sobre todo del número de sets, y la mayor media de la hierba se debe a Wimbledon.
 
-Por último, hay que tener en cuenta las limitaciones del dataset: faltan la duración de casi todo Roland Garros y las estadísticas de 193 partidos, y tanto el ranking como la fecha corresponden a la semana de inicio de cada torneo, lo que hay que tener presente al interpretar los resultados por mes o por ranking.
+En cuanto a las limitaciones del dataset, falta la duración de casi todo Roland Garros y las estadísticas de 193 partidos, y el ranking y la fecha son los de la semana de inicio de cada torneo.
 
 \end{document}
