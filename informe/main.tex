@@ -274,6 +274,10 @@ Desde la consola se comprueban el número de documentos y la estructura de un pa
 \rotulo{Resultado}
 \resultado{crud_1}{Número de documentos y estructura de un partido}
 
+\rotulo{Interpretación}
+
+La colección tiene los 2944 partidos del fichero. En el primer documento, un partido de la United Cup, se ven el array \texttt{sets} con un documento por set y el subdocumento \texttt{ganador} con los datos del jugador. La superficie aparece todavía en inglés y se traduce en el apartado 3.1.
+
 % ---------------------------------------------------------------------
 %  3. INSERCIÓN, ACTUALIZACIÓN, PROYECCIÓN Y FILTRADO
 % ---------------------------------------------------------------------
@@ -494,7 +498,7 @@ Se agrupan los jugadores por tramos de altura con \texttt{\$bucket} y se calcula
 
 \rotulo{Interpretación}
 
-La media de aces crece en todos los tramos, de 2.2 por partido por debajo de 1.75 metros a 12.4 por encima de 2 metros. El tramo con más partidos es el de 1.85 a 1.89 metros.
+La media de aces crece en todos los tramos, de 2.2 por partido por debajo de 1.75 m a 12.4 por encima de 2 m. El tramo con más partidos es el de 1.85 a 1.89 m.
 
 \bigskip
 \pregunta{4.7}{Victorias de Alcaraz y Sinner por mes}
@@ -538,7 +542,7 @@ Esta gráfica se obtiene de la colección \texttt{jugadores}, sin repetir la agr
   \begin{minipage}{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{tiebreaks_superficie}
-    \caption{Sets que acaban en tiebreak por superficie}
+    \caption{Tiebreaks por superficie}
   \end{minipage}\hfill
   \begin{minipage}{0.48\linewidth}
     \centering
