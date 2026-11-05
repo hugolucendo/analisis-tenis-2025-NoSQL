@@ -1,14 +1,14 @@
 # Análisis de la temporada ATP 2025 con MongoDB
 
-Tarea final de la asignatura Bases de Datos NoSQL del Máster en Big Data, Data Science e Inteligencia Artificial (UCM).
+Análisis de los partidos de la temporada 2025 del circuito ATP con MongoDB: carga del dataset, consultas de inserción, actualización, proyección y filtrado, pipelines de agregación y visualización de resultados con Python.
 
 ## Contenido
 
-- `informe.pdf`: informe del trabajo.
+- `informe.pdf`: informe completo del análisis.
 - `datos/atp_partidos_2025.csv`: dataset original de la temporada 2025.
 - `datos/atp_partidos_2025.json`: el mismo dataset en JSON, generado con el script y sin las actualizaciones de las consultas.
 - `convertir_csv_a_json.py`: script que pasa el CSV a JSON.
-- `consultas_tenis.js`: consultas del trabajo, en el mismo orden que el informe.
+- `consultas_tenis.js`: consultas del análisis, en el mismo orden que el informe.
 - `graficas_tenis.ipynb`: conexión a MongoDB desde Python y gráficas de algunas agregaciones.
 - `graficas/`: gráficas generadas con el notebook.
 
