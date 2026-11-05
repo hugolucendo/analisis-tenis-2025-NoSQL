@@ -6,8 +6,7 @@ FICHERO_JSON = "datos/atp_partidos_2025.json"
 
 
 def a_numero(valor):
-    """Convierte un texto del csv a int o float.
-    Si el valor esta vacio devuelve None."""
+    """Pasa un texto del csv a numero, si esta vacio devuelve None."""
     if valor == "":
         return None
     numero = float(valor)
@@ -22,9 +21,7 @@ def formatear_fecha(fecha):
 
 
 def crear_sets(resultado, nivel):
-    """Convierte el resultado en texto a una lista con los sets jugados.
-    Los juegos y los puntos del tiebreak van siempre desde el punto de vista
-    del ganador del partido."""
+    """Pasa el resultado en texto a una lista de sets."""
     sets = []
     numero_set = 0
     for parte in resultado.split(" "):
@@ -78,8 +75,7 @@ def tipo_final(resultado):
 
 
 def crear_jugador(fila, prefijo, prefijo_est):
-    """Devuelve un diccionario con los datos y estadisticas de un jugador.
-    prefijo es winner o loser y prefijo_est es w o l."""
+    """Devuelve un diccionario con los datos de un jugador."""
     jugador = {
         "id": fila[prefijo + "_id"],
         "nombre": fila[prefijo + "_name"],

@@ -39,7 +39,7 @@ var query = { "con_estadisticas": { $exists: false } }
 var operacion = { $set: { "con_estadisticas": true } }
 db.partidos.updateMany( query, operacion )
 
-// Coleccion con el nombre de cada nivel de torneo y los puntos que da al campeon
+// Coleccion con los niveles de torneo
 var array_niveles = [
     { "codigo": "G", "nombre": "Grand Slam", "puntos_campeon": 2000 },
     { "codigo": "F", "nombre": "ATP Finals", "puntos_campeon": 1500 },
@@ -97,8 +97,7 @@ db.partidos.find( query, proyeccion ).sort( opcion ).limit(5)
 var query = { "sets": { $size: 5 } }
 db.partidos.countDocuments( query )
 
-// Partidos ganados aunque el ganador perdio algun set 6-7
-// sin $elemMatch las dos condiciones se pueden cumplir en sets distintos
+// Partidos en los que el ganador perdio un set 6-7, sin $elemMatch y con $elemMatch
 var query = { "sets.juegos_ganador": 6, "sets.juegos_perdedor": 7 }
 db.partidos.countDocuments( query )
 
@@ -116,7 +115,7 @@ var fase2 = { $sort: query2 }
 var etapas = [ fase1, fase2 ]
 db.partidos.aggregate( etapas )
 
-// Duracion media por superficie separando partidos al mejor de 3 y de 5 sets
+// Duracion media por superficie, al mejor de 3 y de 5 sets
 var query1 = { "minutos": { $ne: null } }
 var fase1 = { $match: query1 }
 var grupo = { "superficie": "$superficie", "al_mejor_de": "$al_mejor_de" }
@@ -127,7 +126,7 @@ var fase3 = { $sort: query3 }
 var etapas = [ fase1, fase2, fase3 ]
 db.partidos.aggregate( etapas )
 
-// Titulos de cada jugador y puntos que suman (uniendo con la coleccion niveles)
+// Titulos y puntos de cada jugador
 var query1 = { "ronda": "F" }
 var fase1 = { $match: query1 }
 var query2 = { from: "niveles", localField: "nivel", foreignField: "codigo", as: "info_nivel" }
@@ -141,7 +140,7 @@ var fase6 = { $limit: 5 }
 var etapas = [ fase1, fase2, fase3, fase4, fase5, fase6 ]
 db.partidos.aggregate( etapas )
 
-// Balance de todos los jugadores guardado en una coleccion nueva
+// Balance de cada jugador, lo guardo en la coleccion jugadores
 var jugador1 = { "nombre": "$ganador.nombre", "pais": "$ganador.pais", "victoria": 1 }
 var jugador2 = { "nombre": "$perdedor.nombre", "pais": "$perdedor.pais", "victoria": 0 }
 var query1 = { "_id": 0, "jugadores": [ jugador1, jugador2 ] }
@@ -156,7 +155,7 @@ var fase5 = { $out: "jugadores" }
 var etapas = [ fase1, fase2, fase3, fase4, fase5 ]
 db.partidos.aggregate( etapas )
 
-// Mejores porcentajes de victoria con al menos 40 partidos (sobre la coleccion guardada)
+// Mejores porcentajes de victoria con al menos 40 partidos
 db.jugadores.countDocuments({})
 var query = { "partidos": { $gte: 40 } }
 var opcion = { "porcentaje": -1 }
